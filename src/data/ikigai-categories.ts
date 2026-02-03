@@ -1,0 +1,286 @@
+import type { QuadrantData } from '../types';
+
+export const initialQuadrants: QuadrantData[] = [
+  {
+    id: 'love',
+    label: 'What You Love',
+    description: 'Activities that bring you joy and passion',
+    color: 'bg-red-500',
+    groups: [
+      {
+        id: 'creative',
+        label: 'Creative Expression',
+        options: [
+          { id: 'art', label: 'Visual Arts (painting, drawing, photography)' },
+          { id: 'music', label: 'Music (playing, composing, performing)' },
+          { id: 'writing', label: 'Writing (fiction, poetry, blogging)' },
+          { id: 'design', label: 'Design (graphic, interior, fashion)' },
+          { id: 'crafts', label: 'Crafts (pottery, woodworking, knitting)' },
+        ],
+      },
+      {
+        id: 'helping',
+        label: 'Helping Others',
+        options: [
+          { id: 'teaching', label: 'Teaching and mentoring' },
+          { id: 'coaching', label: 'Coaching and guidance' },
+          { id: 'counseling', label: 'Counseling and emotional support' },
+          { id: 'volunteering', label: 'Volunteering and community service' },
+          { id: 'healing', label: 'Healing and healthcare' },
+        ],
+      },
+      {
+        id: 'intellectual',
+        label: 'Intellectual Pursuits',
+        options: [
+          { id: 'reading', label: 'Reading and literature' },
+          { id: 'research', label: 'Research and discovery' },
+          { id: 'learning', label: 'Continuous learning' },
+          { id: 'puzzles', label: 'Problem-solving and puzzles' },
+          { id: 'philosophy', label: 'Philosophy and big questions' },
+        ],
+      },
+      {
+        id: 'nature',
+        label: 'Nature & Outdoors',
+        options: [
+          { id: 'hiking', label: 'Hiking and walking' },
+          { id: 'gardening', label: 'Gardening and plants' },
+          { id: 'animals', label: 'Working with animals' },
+          { id: 'conservation', label: 'Environmental conservation' },
+          { id: 'adventure', label: 'Outdoor adventures' },
+        ],
+      },
+      {
+        id: 'social',
+        label: 'Social Activities',
+        options: [
+          { id: 'community', label: 'Building community' },
+          { id: 'hosting', label: 'Hosting and entertaining' },
+          { id: 'networking', label: 'Networking and connecting people' },
+          { id: 'activism', label: 'Social activism and causes' },
+          { id: 'collaboration', label: 'Team collaboration' },
+        ],
+      },
+    ],
+    selected: [],
+    customInputs: [],
+  },
+  {
+    id: 'goodAt',
+    label: 'What You\'re Good At',
+    description: 'Your skills, talents, and strengths',
+    color: 'bg-blue-500',
+    groups: [
+      {
+        id: 'communication',
+        label: 'Communication',
+        options: [
+          { id: 'writing', label: 'Writing and copywriting' },
+          { id: 'speaking', label: 'Public speaking and presenting' },
+          { id: 'listening', label: 'Active listening' },
+          { id: 'negotiation', label: 'Negotiation and persuasion' },
+          { id: 'storytelling', label: 'Storytelling' },
+        ],
+      },
+      {
+        id: 'technical',
+        label: 'Technical Skills',
+        options: [
+          { id: 'programming', label: 'Programming and coding' },
+          { id: 'data-analysis', label: 'Data analysis' },
+          { id: 'engineering', label: 'Engineering' },
+          { id: 'digital-tools', label: 'Digital tools and software' },
+          { id: 'research-methods', label: 'Research methods' },
+        ],
+      },
+      {
+        id: 'creative-skills',
+        label: 'Creative Skills',
+        options: [
+          { id: 'visual-design', label: 'Visual design' },
+          { id: 'video', label: 'Video production' },
+          { id: 'photography', label: 'Photography' },
+          { id: 'music-production', label: 'Music production' },
+          { id: 'creative-thinking', label: 'Creative thinking and ideation' },
+        ],
+      },
+      {
+        id: 'leadership',
+        label: 'Leadership & Management',
+        options: [
+          { id: 'team-management', label: 'Team management' },
+          { id: 'project-management', label: 'Project management' },
+          { id: 'strategic-planning', label: 'Strategic planning' },
+          { id: 'decision-making', label: 'Decision making' },
+          { id: 'conflict-resolution', label: 'Conflict resolution' },
+        ],
+      },
+      {
+        id: 'analytical',
+        label: 'Analytical Skills',
+        options: [
+          { id: 'critical-thinking', label: 'Critical thinking' },
+          { id: 'problem-solving', label: 'Complex problem solving' },
+          { id: 'pattern-recognition', label: 'Pattern recognition' },
+          { id: 'financial-analysis', label: 'Financial analysis' },
+          { id: 'systems-thinking', label: 'Systems thinking' },
+        ],
+      },
+      {
+        id: 'interpersonal',
+        label: 'Interpersonal Skills',
+        options: [
+          { id: 'empathy', label: 'Empathy and emotional intelligence' },
+          { id: 'relationship-building', label: 'Relationship building' },
+          { id: 'mentoring', label: 'Mentoring and coaching' },
+          { id: 'cultural-awareness', label: 'Cultural awareness' },
+          { id: 'collaboration', label: 'Collaboration' },
+        ],
+      },
+    ],
+    selected: [],
+    customInputs: [],
+  },
+  {
+    id: 'worldNeeds',
+    label: 'What the World Needs',
+    description: 'Problems you see that need solving',
+    color: 'bg-green-500',
+    groups: [
+      {
+        id: 'social-issues',
+        label: 'Social Issues',
+        options: [
+          { id: 'education', label: 'Education access and quality' },
+          { id: 'healthcare-access', label: 'Healthcare access' },
+          { id: 'poverty', label: 'Poverty and inequality' },
+          { id: 'mental-health', label: 'Mental health awareness' },
+          { id: 'aging-population', label: 'Aging population support' },
+        ],
+      },
+      {
+        id: 'environment',
+        label: 'Environmental Challenges',
+        options: [
+          { id: 'climate-change', label: 'Climate change solutions' },
+          { id: 'sustainability', label: 'Sustainable practices' },
+          { id: 'pollution', label: 'Pollution reduction' },
+          { id: 'biodiversity', label: 'Biodiversity protection' },
+          { id: 'renewable-energy', label: 'Renewable energy' },
+        ],
+      },
+      {
+        id: 'technology',
+        label: 'Technology & Innovation',
+        options: [
+          { id: 'digital-access', label: 'Digital access and literacy' },
+          { id: 'privacy', label: 'Privacy and security' },
+          { id: 'ai-ethics', label: 'AI ethics and regulation' },
+          { id: 'automation', label: 'Responsible automation' },
+          { id: 'tech-education', label: 'Technology education' },
+        ],
+      },
+      {
+        id: 'economic',
+        label: 'Economic & Business',
+        options: [
+          { id: 'job-creation', label: 'Job creation' },
+          { id: 'small-business', label: 'Small business support' },
+          { id: 'fair-trade', label: 'Fair trade practices' },
+          { id: 'financial-literacy', label: 'Financial literacy' },
+          { id: 'economic-justice', label: 'Economic justice' },
+        ],
+      },
+      {
+        id: 'community',
+        label: 'Community & Culture',
+        options: [
+          { id: 'community-building', label: 'Community building' },
+          { id: 'cultural-preservation', label: 'Cultural preservation' },
+          { id: 'arts-access', label: 'Arts access and funding' },
+          { id: 'local-food', label: 'Local food systems' },
+          { id: 'safety', label: 'Public safety' },
+        ],
+      },
+    ],
+    selected: [],
+    customInputs: [],
+  },
+  {
+    id: 'paidFor',
+    label: 'What You Can Be Paid For',
+    description: 'Career paths and market opportunities',
+    color: 'bg-yellow-500',
+    groups: [
+      {
+        id: 'technology-sector',
+        label: 'Technology',
+        options: [
+          { id: 'software-dev', label: 'Software development' },
+          { id: 'data-science', label: 'Data science and AI' },
+          { id: 'cybersecurity', label: 'Cybersecurity' },
+          { id: 'product-management', label: 'Product management' },
+          { id: 'ux-design', label: 'UX/UI design' },
+        ],
+      },
+      {
+        id: 'business',
+        label: 'Business & Finance',
+        options: [
+          { id: 'consulting', label: 'Consulting' },
+          { id: 'marketing', label: 'Marketing and sales' },
+          { id: 'finance', label: 'Finance and investing' },
+          { id: 'entrepreneurship', label: 'Entrepreneurship' },
+          { id: 'operations', label: 'Operations management' },
+        ],
+      },
+      {
+        id: 'healthcare',
+        label: 'Healthcare & Wellness',
+        options: [
+          { id: 'medicine', label: 'Medicine and nursing' },
+          { id: 'therapy', label: 'Therapy and counseling' },
+          { id: 'fitness', label: 'Fitness and personal training' },
+          { id: 'nutrition', label: 'Nutrition and dietetics' },
+          { id: 'wellness-coaching', label: 'Wellness coaching' },
+        ],
+      },
+      {
+        id: 'education',
+        label: 'Education & Training',
+        options: [
+          { id: 'teaching-k12', label: 'K-12 teaching' },
+          { id: 'higher-ed', label: 'Higher education' },
+          { id: 'corporate-training', label: 'Corporate training' },
+          { id: 'online-courses', label: 'Online course creation' },
+          { id: 'tutoring', label: 'Tutoring' },
+        ],
+      },
+      {
+        id: 'creative-industry',
+        label: 'Creative Industries',
+        options: [
+          { id: 'content-creation', label: 'Content creation' },
+          { id: 'media-production', label: 'Media production' },
+          { id: 'writing-editing', label: 'Writing and editing' },
+          { id: 'art-design', label: 'Art and design' },
+          { id: 'entertainment', label: 'Entertainment' },
+        ],
+      },
+      {
+        id: 'service',
+        label: 'Service Industries',
+        options: [
+          { id: 'hospitality', label: 'Hospitality and tourism' },
+          { id: 'real-estate', label: 'Real estate' },
+          { id: 'legal', label: 'Legal services' },
+          { id: 'social-work', label: 'Social work' },
+          { id: 'customer-service', label: 'Customer service excellence' },
+        ],
+      },
+    ],
+    selected: [],
+    customInputs: [],
+  },
+];
