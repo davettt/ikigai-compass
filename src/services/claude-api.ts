@@ -1,38 +1,60 @@
 import type { AssessmentData, AnalysisConfig, QuadrantWeights, LifeContext } from '../types';
 import { LIFE_CONTEXT_OPTIONS } from '../types';
 
-// Try to auto-discover the API server port
-// Start at 3010 to avoid common dev ports (3000-3009)
+// API discovery - try same origin first (production), then scan ports (development)
 const DEFAULT_PORT = 3010;
 const MAX_PORT = 3020;
 
-let discoveredPort: number | null = null;
+let discoveredApiBase: string | null = null;
 
 export const getApiBaseUrl = async (): Promise<string> => {
   // If we already found it, use it
-  if (discoveredPort) {
-    return `http://localhost:${discoveredPort}/api`;
+  if (discoveredApiBase) {
+    return discoveredApiBase;
   }
-  
-  // Try ports 3001-3010
+
+  // In production, frontend and API are served from same origin
+  // Try same-origin first (relative URL)
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 500);
+
+    const response = await fetch('/api/health', {
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.status === 'ok' && data.app === 'ikigai-compass') {
+        discoveredApiBase = '/api';
+        console.log('Using same-origin API');
+        return '/api';
+      }
+    }
+  } catch {
+    // Same-origin not available, try port scanning (development mode)
+  }
+
+  // Development mode: scan ports 3010-3020
   for (let port = DEFAULT_PORT; port <= MAX_PORT; port++) {
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 500);
-      
-      // Check health endpoint
+
       const response = await fetch(`http://localhost:${port}/api/health`, {
         signal: controller.signal,
       });
-      
+
       clearTimeout(timeout);
-      
+
       if (response.ok) {
         const data = await response.json();
-        // Verify it's OUR server - check for our specific response format
         if (data.status === 'ok' && data.app === 'ikigai-compass') {
-          discoveredPort = port;
-          return `http://localhost:${port}/api`;
+          discoveredApiBase = `http://localhost:${port}/api`;
+          console.log(`Found Ikigai Compass API on port ${port}`);
+          return discoveredApiBase;
         } else {
           console.log(`Port ${port} has server but not Ikigai Compass, continuing...`);
         }
@@ -41,10 +63,10 @@ export const getApiBaseUrl = async (): Promise<string> => {
       // Port not available, try next
     }
   }
-  
+
   throw new Error(
-    `Could not find Ikigai Compass server on ports ${DEFAULT_PORT}-${MAX_PORT}. ` +
-    `Please ensure the server is running with: npm run server`
+    `Could not find Ikigai Compass server. ` +
+    `Please ensure the server is running with: npm run dev`
   );
 };
 

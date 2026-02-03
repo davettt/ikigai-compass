@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { existsSync } from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -11,9 +12,14 @@ const __dirname = dirname(__filename);
 const envPath = join(__dirname, '..', '.env');
 dotenv.config({ path: envPath });
 
+// Only serve static files in production mode (when NODE_ENV=production)
+const distPath = join(__dirname, '..', 'dist');
+const isProduction = process.env.NODE_ENV === 'production';
+const serveStaticFiles = isProduction && existsSync(distPath);
+
 const app = express();
-// Start at 3010 to avoid common dev ports (3000-3009)
-const DEFAULT_PORT = 3010;
+// Use PORT env if set, otherwise start at 3010 to avoid common dev ports (3000-3009)
+const DEFAULT_PORT = parseInt(process.env.PORT, 10) || 3010;
 
 // Enable CORS for all origins (safe for local development)
 app.use(cors({
@@ -96,11 +102,27 @@ app.post('/api/claude', async (req, res) => {
   }
 });
 
-// Catch-all for debugging 404s
-app.use((req, res) => {
-  console.log(`404: ${req.method} ${req.url}`);
-  res.status(404).json({ error: `Route not found: ${req.method} ${req.url}` });
-});
+// Serve static files from dist folder in production
+if (serveStaticFiles) {
+  console.log('Production mode: Serving static files from dist/');
+  app.use(express.static(distPath));
+
+  // SPA fallback - serve index.html for all non-API routes
+  app.use((req, res) => {
+    // Don't serve index.html for API routes
+    if (req.path.startsWith('/api/')) {
+      res.status(404).json({ error: `Route not found: ${req.method} ${req.url}` });
+    } else {
+      res.sendFile(join(distPath, 'index.html'));
+    }
+  });
+} else {
+  // Development mode - just handle 404s for API routes
+  app.use((req, res) => {
+    console.log(`404: ${req.method} ${req.url}`);
+    res.status(404).json({ error: `Route not found: ${req.method} ${req.url}` });
+  });
+}
 
 const MAX_PORT = 3020;
 const HOST = '0.0.0.0'; // Bind to all IPv4 interfaces for proper port conflict detection
@@ -117,6 +139,13 @@ const tryStartServer = (port) => {
   server.on('listening', () => {
     console.log(`✓ Ikigai Compass server running on http://localhost:${port}`);
     console.log(`✓ API proxy ready at http://localhost:${port}/api/claude`);
+    if (serveStaticFiles) {
+      console.log(`✓ Frontend served at http://localhost:${port}`);
+    } else if (isProduction && !existsSync(distPath)) {
+      console.log(`ℹ No dist/ folder found - run 'npm run build' first`);
+    } else {
+      console.log(`ℹ Development mode - use Vite frontend at http://localhost:5173`);
+    }
   });
 
   server.on('error', (err) => {
