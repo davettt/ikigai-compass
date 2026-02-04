@@ -73,8 +73,7 @@ export const AnalysisScreen: React.FC<AnalysisScreenProps> = ({
               ? `Using ${modelOption.name} to create your personalized analysis for the "${lifeContextOption?.label}" stage...`
               : error
                 ? 'Something went wrong while generating your analysis'
-                : 'Your ikigai analysis is ready'
-            }
+                : 'Your ikigai analysis is ready'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -90,9 +89,7 @@ export const AnalysisScreen: React.FC<AnalysisScreenProps> = ({
               <Button variant="outline" onClick={onBack}>
                 Go Back
               </Button>
-              <Button onClick={generateAnalysis}>
-                Try Again
-              </Button>
+              <Button onClick={generateAnalysis}>Try Again</Button>
             </div>
           )}
         </CardContent>

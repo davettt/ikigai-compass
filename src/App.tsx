@@ -22,9 +22,10 @@ function App() {
     const saved = localStorage.getItem(PROGRESS_KEY);
     return saved ? JSON.parse(saved).currentQuadrantIndex : 0;
   });
-  const [hasSavedProgress, setHasSavedProgress] = useState(() => {
-    return !!localStorage.getItem(PROGRESS_KEY);
-  });
+  // Derive hasSavedProgress from current quadrants state
+  const hasSavedProgress = quadrants.some(
+    q => (q.selected?.length ?? 0) > 0 || q.customInputs?.some(i => i.trim())
+  );
   const [analysisContent, setAnalysisContent] = useState<string>('');
   const [analysisConfig, setAnalysisConfig] = useState<AnalysisConfig>({
     model: 'haiku-3.5',
@@ -38,54 +39,62 @@ function App() {
 
   const clearProgress = useCallback(() => {
     localStorage.removeItem(PROGRESS_KEY);
-    setHasSavedProgress(false);
     setQuadrants(initialQuadrants);
     setCurrentQuadrantIndex(0);
   }, []);
 
-  const handleStart = useCallback((shouldClear: boolean = true) => {
-    if (shouldClear) {
-      clearProgress();
-    }
-    setView('assessment');
-  }, [clearProgress]);
+  const handleStart = useCallback(
+    (shouldClear: boolean = true) => {
+      if (shouldClear) {
+        clearProgress();
+      }
+      setView('assessment');
+    },
+    [clearProgress]
+  );
 
   const handleResume = useCallback(() => {
     setView('assessment');
   }, []);
 
   const handleToggleOption = useCallback((quadrantId: string, optionId: string) => {
-    setQuadrants(prev => prev.map(q => {
-      if (q.id !== quadrantId) return q;
-      
-      const isSelected = q.selected.includes(optionId);
-      return {
-        ...q,
-        selected: isSelected
-          ? q.selected.filter(id => id !== optionId)
-          : [...q.selected, optionId]
-      };
-    }));
+    setQuadrants(prev =>
+      prev.map(q => {
+        if (q.id !== quadrantId) return q;
+
+        const isSelected = q.selected.includes(optionId);
+        return {
+          ...q,
+          selected: isSelected
+            ? q.selected.filter(id => id !== optionId)
+            : [...q.selected, optionId],
+        };
+      })
+    );
   }, []);
 
   const handleAddCustom = useCallback((quadrantId: string, value: string) => {
-    setQuadrants(prev => prev.map(q => {
-      if (q.id !== quadrantId) return q;
-      return {
-        ...q,
-        customInputs: [...q.customInputs, value]
-      };
-    }));
+    setQuadrants(prev =>
+      prev.map(q => {
+        if (q.id !== quadrantId) return q;
+        return {
+          ...q,
+          customInputs: [...q.customInputs, value],
+        };
+      })
+    );
   }, []);
 
   const handleRemoveCustom = useCallback((quadrantId: string, index: number) => {
-    setQuadrants(prev => prev.map(q => {
-      if (q.id !== quadrantId) return q;
-      return {
-        ...q,
-        customInputs: q.customInputs.filter((_, i) => i !== index)
-      };
-    }));
+    setQuadrants(prev =>
+      prev.map(q => {
+        if (q.id !== quadrantId) return q;
+        return {
+          ...q,
+          customInputs: q.customInputs.filter((_, i) => i !== index),
+        };
+      })
+    );
   }, []);
 
   const handleNext = useCallback(() => {
@@ -139,8 +148,15 @@ function App() {
 
   switch (view) {
     case 'welcome':
-      return <WelcomeScreen onStart={handleStart} onHistory={handleHistory} hasSavedProgress={hasSavedProgress} onResume={handleResume} />;
-    
+      return (
+        <WelcomeScreen
+          onStart={handleStart}
+          onHistory={handleHistory}
+          hasSavedProgress={hasSavedProgress}
+          onResume={handleResume}
+        />
+      );
+
     case 'assessment':
       return (
         <QuadrantSelector
@@ -148,22 +164,19 @@ function App() {
           currentIndex={currentQuadrantIndex}
           onNext={handleNext}
           onPrevious={handlePrevious}
+          onExit={() => setView('welcome')}
           onToggleOption={handleToggleOption}
           onAddCustom={handleAddCustom}
           onRemoveCustom={handleRemoveCustom}
           onComplete={handleReview}
         />
       );
-    
+
     case 'review':
       return (
-        <ReviewScreen
-          quadrants={quadrants}
-          onEdit={handleEditQuadrant}
-          onAnalyze={handleAnalyze}
-        />
+        <ReviewScreen quadrants={quadrants} onEdit={handleEditQuadrant} onAnalyze={handleAnalyze} />
       );
-    
+
     case 'analysis':
       return (
         <AnalysisScreen
@@ -173,7 +186,7 @@ function App() {
           onBack={() => setView('review')}
         />
       );
-    
+
     case 'report':
       return (
         <ReportScreen
@@ -183,17 +196,19 @@ function App() {
           onHistory={handleHistory}
         />
       );
-    
+
     case 'history':
+      return <HistoryScreen onBack={() => setView('welcome')} onNew={handleNewAssessment} />;
+
+    default:
       return (
-        <HistoryScreen
-          onBack={() => setView('welcome')}
-          onNew={handleNewAssessment}
+        <WelcomeScreen
+          onStart={handleStart}
+          onHistory={handleHistory}
+          hasSavedProgress={hasSavedProgress}
+          onResume={handleResume}
         />
       );
-    
-    default:
-      return <WelcomeScreen onStart={handleStart} onHistory={handleHistory} hasSavedProgress={hasSavedProgress} onResume={handleResume} />;
   }
 }
 

@@ -10,7 +10,12 @@ interface WelcomeScreenProps {
   onResume: () => void;
 }
 
-export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onHistory, hasSavedProgress, onResume }) => {
+export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
+  onStart,
+  onHistory,
+  hasSavedProgress,
+  onResume,
+}) => {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background to-muted">
       <Card className="w-full max-w-2xl">
@@ -30,30 +35,24 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart, onHistory
             <div className="flex flex-col items-center text-center p-4 rounded-lg bg-muted/50">
               <Sparkles className="w-8 h-8 text-yellow-500 mb-2" />
               <h3 className="font-semibold mb-1">AI-Powered</h3>
-              <p className="text-sm text-muted-foreground">
-                Personalized analysis using Claude AI
-              </p>
+              <p className="text-sm text-muted-foreground">Personalized analysis using Claude AI</p>
             </div>
             <div className="flex flex-col items-center text-center p-4 rounded-lg bg-muted/50">
               <Lock className="w-8 h-8 text-green-500 mb-2" />
               <h3 className="font-semibold mb-1">100% Private</h3>
-              <p className="text-sm text-muted-foreground">
-                All data stays on your device
-              </p>
+              <p className="text-sm text-muted-foreground">All data stays on your device</p>
             </div>
             <div className="flex flex-col items-center text-center p-4 rounded-lg bg-muted/50">
               <Compass className="w-8 h-8 text-blue-500 mb-2" />
               <h3 className="font-semibold mb-1">Actionable</h3>
-              <p className="text-sm text-muted-foreground">
-                Clear pathways and next steps
-              </p>
+              <p className="text-sm text-muted-foreground">Clear pathways and next steps</p>
             </div>
           </div>
 
           <div className="bg-muted/30 rounded-lg p-4 text-sm text-muted-foreground">
             <p className="mb-2">
-              <strong>What is Ikigai?</strong> Ikigai (生き甲斐) is a Japanese concept meaning 
-              "a reason for being." It lies at the intersection of:
+              <strong>What is Ikigai?</strong> Ikigai (生き甲斐) is a Japanese concept meaning "a
+              reason for being." It lies at the intersection of:
             </p>
             <ul className="list-disc list-inside space-y-1 ml-2">
               <li>What you love (your passion)</li>

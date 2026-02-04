@@ -1,5 +1,6 @@
 import type { AssessmentData, AnalysisConfig, QuadrantWeights, LifeContext } from '../types';
 import { LIFE_CONTEXT_OPTIONS } from '../types';
+import { escapeForPrompt } from '../utils/sanitize';
 
 // API discovery - try same origin first (production), then scan ports (development)
 const DEFAULT_PORT = 3010;
@@ -66,7 +67,7 @@ export const getApiBaseUrl = async (): Promise<string> => {
 
   throw new Error(
     `Could not find Ikigai Compass server. ` +
-    `Please ensure the server is running with: npm run dev`
+      `Please ensure the server is running with: npm run dev`
   );
 };
 
@@ -88,14 +89,15 @@ const getWeightingContext = (weights: QuadrantWeights): string => {
     .map(([key, value]) => {
       const labels: Record<string, string> = {
         love: 'What You Love',
-        goodAt: 'What You\'re Good At',
+        goodAt: "What You're Good At",
         worldNeeds: 'What the World Needs',
         paidFor: 'What You Can Be Paid For',
       };
       return { key, label: labels[key], value };
     });
 
-  const isBalanced = Math.max(...Object.values(weights)) - Math.min(...Object.values(weights)) <= 15;
+  const isBalanced =
+    Math.max(...Object.values(weights)) - Math.min(...Object.values(weights)) <= 15;
 
   if (isBalanced) {
     return `The person values all four dimensions relatively equally (${sorted.map(s => `${s.label}: ${s.value}%`).join(', ')}). Seek a balanced center point where all four intersect harmoniously.`;
@@ -133,7 +135,8 @@ export const buildIkigaiPrompt = (data: AssessmentData, config: AnalysisConfig):
       }
     });
 
-    const custom = q.customInputs.filter(i => i.trim());
+    // Escape custom inputs to prevent prompt injection
+    const custom = q.customInputs.filter(i => i.trim()).map(i => escapeForPrompt(i));
     if (custom.length > 0) {
       groupedSelections.push(`Custom additions: ${custom.join(', ')}`);
     }

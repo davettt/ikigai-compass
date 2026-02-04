@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { Edit3, Sparkles, ChevronRight, Zap, Brain, Lightbulb, Heart, Star, Globe, Briefcase } from 'lucide-react';
+import {
+  Edit3,
+  Sparkles,
+  ChevronRight,
+  Zap,
+  Brain,
+  Lightbulb,
+  Heart,
+  Star,
+  Globe,
+  Briefcase,
+} from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import type { QuadrantData, AnalysisConfig, QuadrantWeights, LifeContext } from '../../types';
@@ -26,7 +37,7 @@ const quadrantIcons = {
 
 const quadrantLabels: Record<keyof QuadrantWeights, string> = {
   love: 'What You Love',
-  goodAt: 'What You\'re Good At',
+  goodAt: "What You're Good At",
   worldNeeds: 'What the World Needs',
   paidFor: 'What You Can Be Paid For',
 };
@@ -49,9 +60,11 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({ quadrants, onEdit, o
       }
     });
 
-    quadrant.customInputs.filter(i => i.trim()).forEach(input => {
-      labels.push(input);
-    });
+    quadrant.customInputs
+      .filter(i => i.trim())
+      .forEach(input => {
+        labels.push(input);
+      });
 
     return labels;
   };
@@ -86,7 +99,7 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({ quadrants, onEdit, o
       if (total !== 100) {
         const adjustment = 100 - total;
         // Add adjustment to the largest other value
-        const largestOther = otherKeys.reduce((a, b) => newWeights[a] > newWeights[b] ? a : b);
+        const largestOther = otherKeys.reduce((a, b) => (newWeights[a] > newWeights[b] ? a : b));
         newWeights[largestOther] += adjustment;
       }
 
@@ -140,7 +153,10 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({ quadrants, onEdit, o
                     {selected.length > 0 ? (
                       <ul className="space-y-1">
                         {selected.map((item, i) => (
-                          <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                          <li
+                            key={i}
+                            className="text-sm text-muted-foreground flex items-start gap-2"
+                          >
                             <span className="text-primary">•</span>
                             {item}
                           </li>
@@ -160,7 +176,7 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({ quadrants, onEdit, o
             <div className="space-y-3">
               <label className="text-sm font-medium">Where are you in your journey?</label>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-                {LIFE_CONTEXT_OPTIONS.map((option) => (
+                {LIFE_CONTEXT_OPTIONS.map(option => (
                   <button
                     key={option.id}
                     onClick={() => setLifeContext(option.id)}
@@ -184,8 +200,9 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({ quadrants, onEdit, o
               <div>
                 <label className="text-sm font-medium">Quadrant Importance</label>
                 <p className="text-xs text-muted-foreground">
-                  Leave at equal (25% each) if unsure. Only increase a quadrant if it's truly more important to you —
-                  e.g., if doing what you love matters more than getting paid for it.
+                  Leave at equal (25% each) if unsure. Only increase a quadrant if it's truly more
+                  important to you — e.g., if doing what you love matters more than getting paid for
+                  it.
                 </p>
               </div>
               <Button variant="ghost" size="sm" onClick={resetWeights}>
@@ -193,7 +210,7 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({ quadrants, onEdit, o
               </Button>
             </div>
             <div className="space-y-4">
-              {(Object.keys(weights) as (keyof QuadrantWeights)[]).map((key) => (
+              {(Object.keys(weights) as (keyof QuadrantWeights)[]).map(key => (
                 <div key={key} className="flex items-center gap-4">
                   <div className="flex items-center gap-2 w-48">
                     {quadrantIcons[key]}
@@ -204,7 +221,7 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({ quadrants, onEdit, o
                     min="0"
                     max="100"
                     value={weights[key]}
-                    onChange={(e) => handleWeightChange(key, parseInt(e.target.value))}
+                    onChange={e => handleWeightChange(key, parseInt(e.target.value))}
                     className="flex-1 h-2 bg-border rounded-lg appearance-none cursor-pointer accent-primary"
                   />
                   <span className="text-sm font-medium w-12 text-right">{weights[key]}%</span>
@@ -219,7 +236,7 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({ quadrants, onEdit, o
               <div className="space-y-2">
                 <label className="text-sm font-medium">AI Model</label>
                 <div className="flex flex-wrap gap-2">
-                  {MODEL_OPTIONS.map((model) => (
+                  {MODEL_OPTIONS.map(model => (
                     <button
                       key={model.id}
                       onClick={() => setSelectedModel(model.id)}

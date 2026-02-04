@@ -12,14 +12,16 @@ Ikigai (生き甲斐) is a Japanese concept meaning "a reason for being." It lie
 
 ## Features
 
-- **Interactive Assessment**: Select from comprehensive categories across all four ikigai quadrants, plus add your own custom entries
+- **Comprehensive Assessment**: 190+ curated options across 30+ categories covering all four ikigai quadrants, plus custom entries
+- **Guided Experience**: Detailed instructions on each assessment screen help you make thoughtful selections
 - **Life Context**: Tailor analysis to your journey stage (exploring, transitioning, established, reinventing, retiring)
 - **Priority Weighting**: Adjust importance of each quadrant to reflect your values
 - **Model Selection**: Choose between Haiku 3.5 (fast), Sonnet 4 (balanced), or Opus 4 (deep analysis)
 - **Cultural Nuance**: Analysis incorporates authentic Japanese ikigai principles, not just the Western Venn diagram
 - **Beautiful Reports**: Export as PDF or copy as Markdown
+- **History Management**: View, rename, and manage your saved analyses
 - **100% Private**: Your API key, your data - everything stays local
-- **History Tracking**: Save and review past ikigai analyses
+- **Persistent History**: Reports saved to local files for reliable storage
 
 ## Quick Start
 
@@ -66,9 +68,12 @@ ikigai-compass/
 │   ├── services/       # API and storage services
 │   ├── data/           # Ikigai category data
 │   ├── types/          # TypeScript types
-│   └── lib/            # Utility functions
+│   ├── utils/          # Utility functions
+│   └── lib/            # Helper functions
 ├── server/             # Backend API proxy server
-├── public/             # Static assets
+├── public/             # Static assets and PWA icons
+├── local_data/         # Persistent storage (gitignored)
+│   └── reports/        # Saved ikigai reports
 ├── .env                # API key (gitignored)
 └── .env.example        # Template for .env
 ```
@@ -85,9 +90,6 @@ npm run dev:vite
 # Run only the backend server
 npm run server
 
-# Type check
-npx tsc --noEmit
-
 # Build for production
 npm run build
 
@@ -95,9 +97,28 @@ npm run build
 npm run preview
 ```
 
+### Code Quality Scripts
+
+```bash
+# Run all checks (typecheck + lint + format)
+npm run check
+
+# Run all checks with auto-fix
+npm run check:fix
+
+# Individual commands
+npm run typecheck        # TypeScript type checking
+npm run lint             # ESLint
+npm run lint:fix         # ESLint with auto-fix
+npm run format           # Prettier format
+npm run format:check     # Prettier check only
+npm run audit            # Security vulnerability scan
+npm run audit:fix        # Auto-fix security issues
+```
+
 ## Production Deployment with PM2
 
-For a more robust setup, use PM2 to manage the backend server:
+For a more robust setup, use PM2 to manage the server:
 
 ```bash
 # Install PM2 globally
@@ -106,11 +127,8 @@ npm install -g pm2
 # Build the frontend
 npm run build
 
-# Start the backend server with PM2
-pm2 start server/index.js --name ikigai-compass-api
-
-# Serve the frontend (using serve or your preferred static server)
-pm2 start npx --name ikigai-compass-web -- serve dist -l 5173
+# Start with PM2 (serves both API and frontend)
+NODE_ENV=production pm2 start server/index.js --name ikigai-compass
 
 # Save PM2 process list (survives reboots)
 pm2 save
@@ -119,23 +137,16 @@ pm2 save
 pm2 startup
 ```
 
+In production mode (`NODE_ENV=production`), the server serves both the API and the built frontend from the `dist/` folder on a single port.
+
 ### PM2 Management Commands
 
 ```bash
-# View running processes
-pm2 list
-
-# View logs
-pm2 logs ikigai-compass-api
-
-# Restart server
-pm2 restart ikigai-compass-api
-
-# Stop server
-pm2 stop ikigai-compass-api
-
-# Delete from PM2
-pm2 delete ikigai-compass-api
+pm2 list                    # View running processes
+pm2 logs ikigai-compass     # View logs
+pm2 restart ikigai-compass  # Restart server
+pm2 stop ikigai-compass     # Stop server
+pm2 delete ikigai-compass   # Remove from PM2
 ```
 
 ### PM2 Ecosystem File (Optional)
@@ -146,18 +157,12 @@ Create `ecosystem.config.cjs` for easier management:
 module.exports = {
   apps: [
     {
-      name: 'ikigai-compass-api',
+      name: 'ikigai-compass',
       script: 'server/index.js',
+      cwd: './ikigai-compass',
       env: {
         NODE_ENV: 'production',
-      },
-    },
-    {
-      name: 'ikigai-compass-web',
-      script: 'npx',
-      args: 'serve dist -l 5173',
-      env: {
-        NODE_ENV: 'production',
+        PORT: 3010,
       },
     },
   ],
@@ -169,9 +174,11 @@ Then run: `pm2 start ecosystem.config.cjs`
 ## Privacy & Security
 
 - Your API key is stored in `.env` (never committed to git)
-- All assessment data is stored in browser localStorage
+- Reports are stored locally in `local_data/reports/` (gitignored)
+- Current assessment progress stored in browser localStorage
 - API calls go through your local server to Claude API only
 - PDFs and reports are generated client-side
+- Input sanitization prevents prompt injection attacks
 
 ## Personal Project Notice
 

@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { Download, Copy, Check, FileText, ChevronLeft, Save, Sparkles } from 'lucide-react';
+import {
+  Download,
+  Copy,
+  Check,
+  FileText,
+  ChevronLeft,
+  Save,
+  Sparkles,
+  Loader2,
+} from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../ui/card';
 import { Input } from '../ui/input';
@@ -37,43 +46,27 @@ const MarkdownComponents = {
     </h3>
   ),
   h4: ({ children }: { children?: React.ReactNode }) => (
-    <h4 className="text-lg font-semibold text-foreground/80 mt-4 mb-2">
-      {children}
-    </h4>
+    <h4 className="text-lg font-semibold text-foreground/80 mt-4 mb-2">{children}</h4>
   ),
   p: ({ children }: { children?: React.ReactNode }) => (
-    <p className="text-muted-foreground leading-relaxed mb-4">
-      {children}
-    </p>
+    <p className="text-muted-foreground leading-relaxed mb-4">{children}</p>
   ),
   ul: ({ children }: { children?: React.ReactNode }) => (
-    <ul className="space-y-2 mb-4 ml-4">
-      {children}
-    </ul>
+    <ul className="space-y-2 mb-4 ml-4">{children}</ul>
   ),
   ol: ({ children }: { children?: React.ReactNode }) => (
-    <ol className="space-y-2 mb-4 ml-4 list-decimal list-inside">
-      {children}
-    </ol>
+    <ol className="space-y-2 mb-4 ml-4 list-decimal list-inside">{children}</ol>
   ),
   li: ({ children }: { children?: React.ReactNode }) => (
-    <li className="text-muted-foreground leading-relaxed">
-      {children}
-    </li>
+    <li className="text-muted-foreground leading-relaxed">{children}</li>
   ),
   strong: ({ children }: { children?: React.ReactNode }) => (
-    <strong className="font-semibold text-foreground">
-      {children}
-    </strong>
+    <strong className="font-semibold text-foreground">{children}</strong>
   ),
   em: ({ children }: { children?: React.ReactNode }) => (
-    <em className="italic text-foreground/90">
-      {children}
-    </em>
+    <em className="italic text-foreground/90">{children}</em>
   ),
-  hr: () => (
-    <hr className="my-8 border-border" />
-  ),
+  hr: () => <hr className="my-8 border-border" />,
   blockquote: ({ children }: { children?: React.ReactNode }) => (
     <blockquote className="border-l-4 border-primary/30 pl-4 my-4 italic text-muted-foreground">
       {children}
@@ -81,15 +74,12 @@ const MarkdownComponents = {
   ),
 };
 
-export const ReportScreen: React.FC<ReportScreenProps> = ({
-  content,
-  data,
-  onBack,
-  onHistory,
-}) => {
+export const ReportScreen: React.FC<ReportScreenProps> = ({ content, data, onBack, onHistory }) => {
   const [copied, setCopied] = useState(false);
   const [title, setTitle] = useState('');
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(content);
@@ -97,7 +87,9 @@ export const ReportScreen: React.FC<ReportScreenProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveError(null);
     const report: SavedReport = {
       id: generateId(),
       timestamp: new Date().toISOString(),
@@ -106,8 +98,13 @@ export const ReportScreen: React.FC<ReportScreenProps> = ({
       markdownContent: content,
       hasPdf: false,
     };
-    storage.saveReport(report);
-    setSaved(true);
+    const success = await storage.saveReport(report);
+    setSaving(false);
+    if (success) {
+      setSaved(true);
+    } else {
+      setSaveError('Failed to save report');
+    }
   };
 
   const date = formatDate(new Date().toISOString());
@@ -141,15 +138,11 @@ export const ReportScreen: React.FC<ReportScreenProps> = ({
                 id="title"
                 placeholder="e.g., My Career Transition Ikigai"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={e => setTitle(e.target.value)}
               />
             </div>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={handleCopy}
-                className="min-w-[140px]"
-              >
+              <Button variant="outline" onClick={handleCopy} className="min-w-[140px]">
                 {copied ? (
                   <>
                     <Check className="w-4 h-4 mr-2" />
@@ -182,23 +175,32 @@ export const ReportScreen: React.FC<ReportScreenProps> = ({
                 <Sparkles className="w-4 h-4 text-primary" />
                 <span className="text-sm font-semibold text-foreground">Your Ikigai Report</span>
               </div>
-              {!saved ? (
-                <Button size="sm" onClick={handleSave}>
-                  <Save className="w-4 h-4 mr-2" />
-                  Save to History
+              {saving ? (
+                <Button size="sm" disabled>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
                 </Button>
-              ) : (
+              ) : saved ? (
                 <span className="text-sm text-green-600 flex items-center font-medium">
                   <Check className="w-4 h-4 mr-1" />
                   Saved!
                 </span>
+              ) : saveError ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-destructive">{saveError}</span>
+                  <Button size="sm" variant="outline" onClick={handleSave}>
+                    Retry
+                  </Button>
+                </div>
+              ) : (
+                <Button size="sm" onClick={handleSave}>
+                  <Save className="w-4 h-4 mr-2" />
+                  Save to History
+                </Button>
               )}
             </div>
             <div className="p-8 bg-background text-foreground">
-              <ReactMarkdown 
-                remarkPlugins={[remarkGfm]}
-                components={MarkdownComponents}
-              >
+              <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>
                 {content}
               </ReactMarkdown>
             </div>

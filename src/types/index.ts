@@ -36,7 +36,12 @@ export interface SavedReport {
 
 export type ViewState = 'welcome' | 'assessment' | 'review' | 'analysis' | 'report' | 'history';
 
-export type LifeContext = 'exploring' | 'transitioning' | 'established' | 'reinventing' | 'retiring';
+export type LifeContext =
+  | 'exploring'
+  | 'transitioning'
+  | 'established'
+  | 'reinventing'
+  | 'retiring';
 
 export interface LifeContextOption {
   id: LifeContext;

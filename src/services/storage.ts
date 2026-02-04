@@ -1,31 +1,98 @@
 import type { SavedReport } from '../types';
+import { getApiBaseUrl } from './claude-api';
 
-const STORAGE_KEY = 'ikigai_reports';
+// Cache for API base URL
+let apiBase: string | null = null;
+
+const getApi = async (): Promise<string> => {
+  if (!apiBase) {
+    apiBase = await getApiBaseUrl();
+  }
+  return apiBase;
+};
 
 export const storage = {
-  getReports(): SavedReport[] {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+  async getReports(): Promise<SavedReport[]> {
+    try {
+      const api = await getApi();
+      const response = await fetch(`${api}/reports`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch reports');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching reports:', error);
+      return [];
+    }
   },
 
-  saveReport(report: SavedReport): void {
-    const reports = this.getReports();
-    reports.unshift(report);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
+  async getReport(id: string): Promise<SavedReport | null> {
+    try {
+      const api = await getApi();
+      const response = await fetch(`${api}/reports/${encodeURIComponent(id)}`);
+      if (!response.ok) {
+        if (response.status === 404) return null;
+        throw new Error('Failed to fetch report');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching report:', error);
+      return null;
+    }
   },
 
-  deleteReport(id: string): void {
-    const reports = this.getReports().filter(r => r.id !== id);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
+  async saveReport(report: SavedReport): Promise<boolean> {
+    try {
+      const api = await getApi();
+      const response = await fetch(`${api}/reports`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(report),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to save report');
+      }
+      return true;
+    } catch (error) {
+      console.error('Error saving report:', error);
+      return false;
+    }
   },
 
-  getReport(id: string): SavedReport | null {
-    return this.getReports().find(r => r.id === id) || null;
+  async deleteReport(id: string): Promise<boolean> {
+    try {
+      const api = await getApi();
+      const response = await fetch(`${api}/reports/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete report');
+      }
+      return true;
+    } catch (error) {
+      console.error('Error deleting report:', error);
+      return false;
+    }
   },
 
-  clearAll(): void {
-    localStorage.removeItem(STORAGE_KEY);
-  }
+  async updateReport(id: string, updates: { title?: string }): Promise<SavedReport | null> {
+    try {
+      const api = await getApi();
+      const response = await fetch(`${api}/reports/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update report');
+      }
+      const data = await response.json();
+      return data.report;
+    } catch (error) {
+      console.error('Error updating report:', error);
+      return null;
+    }
+  },
 };
 
 export const generateId = (): string => {
@@ -38,6 +105,6 @@ export const formatDate = (timestamp: string): string => {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   });
 };
