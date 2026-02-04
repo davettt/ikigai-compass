@@ -10,6 +10,7 @@
   - Styled markdown rendering with proper headings, lists, and blockquotes
 - **Exit button**: Home icon on assessment screens to exit without losing progress
 - **Detailed quadrant instructions**: Each assessment step now includes guidance on how to approach selections
+- **Non-technical user option**: Printable assessment worksheet (docs/ikigai-assessment-worksheet.md)
 
 ### Changed
 - **Consolidated categories**: Reduced from ~340 to ~192 focused options to minimize overlap

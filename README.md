@@ -23,24 +23,49 @@ Ikigai (生き甲斐) is a Japanese concept meaning "a reason for being." It lie
 - **100% Private**: Your API key, your data - everything stays local
 - **Persistent History**: Reports saved to local files for reliable storage
 
+## Options for Use
+
+### Option A: Self-hosted (recommended for technical users)
+
+See [Quick Start](#quick-start) below. Requires Node.js installation.
+
+### Option B: Printable worksheet (non-technical users)
+
+If you're not comfortable with technical setup:
+1. Download and print [docs/ikigai-assessment-worksheet.md](docs/ikigai-assessment-worksheet.md)
+2. Fill it in and send to David for a personalized analysis
+
+---
+
+## Prerequisites
+
+**Node.js** (version 18 or higher)
+
+1. Visit [nodejs.org](https://nodejs.org/)
+2. Download the **LTS** version for your operating system
+3. Run the installer (accept defaults)
+4. Verify installation: open a terminal and run `node --version`
+
 ## Quick Start
 
 ```bash
-# Clone the repository
-git clone https://github.com/davettt/ikigai-compass.git
-cd ikigai-compass
+# 1. Download ZIP from GitHub (Code → Download ZIP)
+#    Extract and open a terminal in the folder
+#    (Or: git clone https://github.com/davettt/ikigai-compass.git)
 
-# Install dependencies
+# 2. Install dependencies
 npm install
 
-# Setup your API key
+# 3. Setup your API key
 cp .env.example .env
 # Edit .env and add your Anthropic API key:
 # VITE_ANTHROPIC_API_KEY=sk-ant-...
 
-# Run locally
+# 4. Run
 npm run dev
 ```
+
+Open http://localhost:5173 in your browser.
 
 ## Getting an API Key
 
