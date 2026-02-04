@@ -59,8 +59,10 @@ export const validateStoredReport = (data: unknown): boolean => {
   if (!hasContent) return false;
 
   // Validate content is not suspiciously long (prevent storage attacks)
-  const content = (report.markdownContent || report.analysis) as string;
-  if (content.length > 500000) return false;
+  const markdownLen =
+    typeof report.markdownContent === 'string' ? report.markdownContent.length : 0;
+  const analysisLen = typeof report.analysis === 'string' ? report.analysis.length : 0;
+  if (markdownLen > 500000 || analysisLen > 500000) return false;
 
   return true;
 };

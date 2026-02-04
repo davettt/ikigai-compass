@@ -164,11 +164,13 @@ export const QuadrantSelector: React.FC<QuadrantSelectorProps> = ({
                   (input, index) =>
                     input.trim() && (
                       <span
-                        key={index}
+                        key={`${input}-${index}`}
                         className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
                       >
                         {input}
                         <button
+                          type="button"
+                          aria-label={`Remove ${input}`}
                           onClick={() => onRemoveCustom(currentQuadrant.id, index)}
                           className="hover:text-destructive"
                         >

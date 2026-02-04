@@ -90,7 +90,9 @@ app.get('/api/reports', (req, res) => {
 // Get a specific report
 app.get('/api/reports/:id', (req, res) => {
   try {
-    const filename = `${req.params.id}.json`;
+    // Sanitize the ID to prevent path traversal
+    const safeId = req.params.id.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const filename = `${safeId}.json`;
     const filepath = join(reportsDir, filename);
 
     if (!existsSync(filepath)) {

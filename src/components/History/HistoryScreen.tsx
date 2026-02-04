@@ -11,6 +11,7 @@ import {
   Download,
   Sparkles,
   Pencil,
+  X,
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
@@ -82,13 +83,31 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNew }) =
   const [copied, setCopied] = React.useState(false);
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [editTitle, setEditTitle] = React.useState('');
+  const [error, setError] = React.useState<string | null>(null);
+  const copyTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup timeout on unmount
+  React.useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
 
   React.useEffect(() => {
     const loadReports = async () => {
       setLoading(true);
-      const data = await storage.getReports();
-      setReports(data);
-      setLoading(false);
+      setError(null);
+      try {
+        const data = await storage.getReports();
+        setReports(data);
+      } catch (err) {
+        setError('Failed to load reports');
+        console.error('Error loading reports:', err);
+      } finally {
+        setLoading(false);
+      }
     };
     loadReports();
   }, []);
@@ -96,51 +115,118 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNew }) =
   const handleSelectReport = async (report: SavedReport) => {
     setLoadingReport(true);
     setCopied(false);
-    const fullReport = await storage.getReport(report.id);
-    setSelectedReport(fullReport);
-    setLoadingReport(false);
+    try {
+      const fullReport = await storage.getReport(report.id);
+      if (fullReport) {
+        setSelectedReport(fullReport);
+      } else {
+        console.error('Report not found:', report.id);
+      }
+    } catch (err) {
+      console.error('Error loading report:', err);
+    } finally {
+      setLoadingReport(false);
+    }
   };
 
   const handleDelete = async (id: string) => {
-    await storage.deleteReport(id);
-    const data = await storage.getReports();
-    setReports(data);
-    if (selectedReport?.id === id) {
-      setSelectedReport(null);
+    if (!window.confirm('Are you sure you want to delete this report?')) {
+      return;
+    }
+    try {
+      await storage.deleteReport(id);
+      const data = await storage.getReports();
+      setReports(data);
+      if (selectedReport?.id === id) {
+        setSelectedReport(null);
+      }
+    } catch (err) {
+      console.error('Error deleting report:', err);
     }
   };
 
   const handleCopy = async () => {
     if (selectedReport?.markdownContent) {
-      await navigator.clipboard.writeText(selectedReport.markdownContent);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      try {
+        await navigator.clipboard.writeText(selectedReport.markdownContent);
+        setCopied(true);
+        if (copyTimeoutRef.current) {
+          clearTimeout(copyTimeoutRef.current);
+        }
+        copyTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        console.error('Failed to copy to clipboard:', err);
+      }
     }
   };
 
-  const handleStartEdit = (report: SavedReport, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleStartEdit = (report: SavedReport, e?: React.MouseEvent) => {
+    e?.stopPropagation();
     setEditingId(report.id);
     setEditTitle(report.title || '');
   };
 
   const handleSaveEdit = async (id: string) => {
     const trimmedTitle = editTitle.trim();
-    const updated = await storage.updateReport(id, { title: trimmedTitle || undefined });
-    if (updated) {
-      setReports(prev => prev.map(r => (r.id === id ? { ...r, title: updated.title } : r)));
-      if (selectedReport?.id === id) {
-        setSelectedReport({ ...selectedReport, title: updated.title });
+    try {
+      const updated = await storage.updateReport(id, { title: trimmedTitle || undefined });
+      if (updated) {
+        setReports(prev => prev.map(r => (r.id === id ? { ...r, title: updated.title } : r)));
+        if (selectedReport?.id === id) {
+          setSelectedReport({ ...selectedReport, title: updated.title });
+        }
       }
+      setEditingId(null);
+      setEditTitle('');
+    } catch (err) {
+      console.error('Error updating report title:', err);
     }
-    setEditingId(null);
-    setEditTitle('');
   };
 
   const handleCancelEdit = () => {
     setEditingId(null);
     setEditTitle('');
   };
+
+  // Inline edit component for reuse
+  const InlineEditor = ({ id, inHeader = false }: { id: string; inHeader?: boolean }) => (
+    <div className={`flex items-center gap-2 ${inHeader ? '' : ''}`}>
+      <Input
+        value={editTitle}
+        onChange={e => setEditTitle(e.target.value)}
+        onKeyDown={e => {
+          if (e.key === 'Enter') handleSaveEdit(id);
+          if (e.key === 'Escape') handleCancelEdit();
+        }}
+        onClick={e => e.stopPropagation()}
+        placeholder="Enter a title..."
+        className={inHeader ? 'h-8 text-sm w-48' : 'h-7 text-sm'}
+        autoFocus
+      />
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-7 w-7 shrink-0"
+        onClick={e => {
+          e.stopPropagation();
+          handleSaveEdit(id);
+        }}
+      >
+        <Check className="w-3 h-3 text-green-600" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-7 w-7 shrink-0"
+        onClick={e => {
+          e.stopPropagation();
+          handleCancelEdit();
+        }}
+      >
+        <X className="w-3 h-3 text-muted-foreground" />
+      </Button>
+    </div>
+  );
 
   return (
     <div className="min-h-screen p-4 bg-gradient-to-br from-background to-muted">
@@ -174,6 +260,14 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNew }) =
               <Loader2 className="w-8 h-8 text-muted-foreground mx-auto mb-4 animate-spin" />
               <p className="text-muted-foreground">Loading reports...</p>
             </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <FileText className="w-12 h-12 text-destructive mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2 text-destructive">{error}</h3>
+              <Button variant="outline" onClick={() => window.location.reload()}>
+                Retry
+              </Button>
+            </div>
           ) : reports.length === 0 ? (
             <div className="text-center py-12">
               <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -202,31 +296,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNew }) =
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
                         {editingId === report.id ? (
-                          <div className="flex items-center gap-2">
-                            <Input
-                              value={editTitle}
-                              onChange={e => setEditTitle(e.target.value)}
-                              onKeyDown={e => {
-                                if (e.key === 'Enter') handleSaveEdit(report.id);
-                                if (e.key === 'Escape') handleCancelEdit();
-                              }}
-                              onClick={e => e.stopPropagation()}
-                              placeholder="Enter a title..."
-                              className="h-7 text-sm"
-                              autoFocus
-                            />
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 shrink-0"
-                              onClick={e => {
-                                e.stopPropagation();
-                                handleSaveEdit(report.id);
-                              }}
-                            >
-                              <Check className="w-3 h-3 text-green-600" />
-                            </Button>
-                          </div>
+                          <InlineEditor id={report.id} />
                         ) : (
                           <h4 className="font-medium truncate">
                             {report.title || 'Untitled Analysis'}
@@ -277,26 +347,29 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onBack, onNew }) =
                   <div className="border rounded-lg overflow-hidden">
                     <div className="bg-gradient-to-r from-primary/10 to-primary/5 px-4 py-3 border-b flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div>
-                          <h3 className="font-semibold">
-                            {selectedReport.title || 'Ikigai Analysis'}
-                          </h3>
-                          <p className="text-xs text-muted-foreground">
-                            {formatDate(selectedReport.timestamp)}
-                          </p>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7"
-                          onClick={() => {
-                            setEditingId(selectedReport.id);
-                            setEditTitle(selectedReport.title || '');
-                          }}
-                          title="Rename"
-                        >
-                          <Pencil className="w-3 h-3 text-muted-foreground" />
-                        </Button>
+                        {editingId === selectedReport.id ? (
+                          <InlineEditor id={selectedReport.id} inHeader />
+                        ) : (
+                          <>
+                            <div>
+                              <h3 className="font-semibold">
+                                {selectedReport.title || 'Ikigai Analysis'}
+                              </h3>
+                              <p className="text-xs text-muted-foreground">
+                                {formatDate(selectedReport.timestamp)}
+                              </p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={() => handleStartEdit(selectedReport)}
+                              title="Rename"
+                            >
+                              <Pencil className="w-3 h-3 text-muted-foreground" />
+                            </Button>
+                          </>
+                        )}
                       </div>
                       <div className="flex gap-2">
                         <Button

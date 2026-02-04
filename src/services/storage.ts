@@ -1,14 +1,14 @@
 import type { SavedReport } from '../types';
 import { getApiBaseUrl } from './claude-api';
 
-// Cache for API base URL
-let apiBase: string | null = null;
+// Cache for API base URL (stores the promise to prevent concurrent fetches)
+let apiBasePromise: Promise<string> | null = null;
 
 const getApi = async (): Promise<string> => {
-  if (!apiBase) {
-    apiBase = await getApiBaseUrl();
+  if (!apiBasePromise) {
+    apiBasePromise = getApiBaseUrl();
   }
-  return apiBase;
+  return apiBasePromise;
 };
 
 export const storage = {

@@ -2,7 +2,9 @@
 
 Discover your ikigai - your reason for being. Check the boxes that resonate with you in each of the four areas below.
 
-**Instructions**: Print this worksheet or fill it in digitally. Once complete, send to David for your personalized analysis.
+**Instructions**: Print this worksheet or fill it in digitally. Once you've completed the worksheet, upload it to Google Drive and set it to "Anyone with the link can view." Then share that link with David Tiong via the contact form at davidtiong.com/contact for your personalized analysis.
+
+**Privacy**: Your information will only be used to generate your personalized Ikigai analysis and will not be shared with third parties.
 
 ---
 
@@ -326,4 +328,4 @@ _______________________________________________
 
 ---
 
-*Once complete, send this worksheet to David for your personalized Ikigai analysis.*
+*Once you've completed the worksheet, upload it to Google Drive and set it to "Anyone with the link can view." Then share that link with David Tiong via the contact form at davidtiong.com/contact for your personalized analysis.*

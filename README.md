@@ -32,8 +32,9 @@ See [Quick Start](#quick-start) below. Requires Node.js installation.
 ### Option B: Printable worksheet (non-technical users)
 
 If you're not comfortable with technical setup:
+
 1. Download and print [docs/ikigai-assessment-worksheet.md](docs/ikigai-assessment-worksheet.md)
-2. Fill it in and send to David for a personalized analysis
+2. Fill it in and send to David for a personalised analysis
 
 ---
 
@@ -176,7 +177,7 @@ pm2 delete ikigai-compass   # Remove from PM2
 
 ### PM2 Ecosystem File (Optional)
 
-Create `ecosystem.config.cjs` for easier management:
+Create `ecosystem.config.cjs` in the project root for easier management:
 
 ```javascript
 module.exports = {
@@ -184,7 +185,6 @@ module.exports = {
     {
       name: 'ikigai-compass',
       script: 'server/index.js',
-      cwd: './ikigai-compass',
       env: {
         NODE_ENV: 'production',
         PORT: 3010,
