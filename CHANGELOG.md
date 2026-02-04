@@ -23,6 +23,16 @@
 ### Fixed
 - **PDF export**: Japanese/CJK characters now stripped (Helvetica font limitation) instead of causing rendering errors
 - **PDF spacing**: Increased heading margins to prevent content overlap
+- **Security: Path traversal vulnerability** in GET /api/reports/:id endpoint now sanitizes IDs
+- **Security: Content length validation** now checks both markdownContent and analysis fields
+- **Race condition**: API base URL fetching now uses promise-based cache to prevent duplicate requests
+- **Type safety**: CardTitle ref type corrected from HTMLParagraphElement to HTMLHeadingElement
+- **Accessibility**: Custom input remove buttons now have proper type="button" and aria-label
+- **Error handling**: History screen now has comprehensive try/catch for all async operations
+- **UX: Delete confirmation**: Reports now require confirmation before deletion
+- **UX: Inline editor**: Rename functionality now works consistently in both list and detail views
+- **Documentation**: PM2 config example removed hardcoded path assumption
+- **Documentation**: Worksheet now includes submission instructions and privacy notice
 
 ## [1.1.0] - 2026-02-03
 
