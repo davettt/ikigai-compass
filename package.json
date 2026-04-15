@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "concurrently -k -n \"server,vite\" -c \"cyan,magenta\" \"npm run server\" \"vite\"",
     "dev:vite": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node -e \"fs.writeFileSync('.last-build',Date.now().toString())\"",
     "preview": "vite preview",
     "server": "node server/index.js",
     "lint": "eslint .",

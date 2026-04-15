@@ -14,6 +14,14 @@ const PROGRESS_KEY = 'ikigai_current_assessment';
 
 function App() {
   const [view, setView] = useState<ViewState>('welcome');
+  const [buildStale, setBuildStale] = useState(false);
+
+  useEffect(() => {
+    void fetch('/api/build-status')
+      .then(r => r.json())
+      .then(d => setBuildStale(d.stale === true))
+      .catch(() => {});
+  }, []);
   const [quadrants, setQuadrants] = useState<QuadrantData[]>(() => {
     const saved = localStorage.getItem(PROGRESS_KEY);
     return saved ? JSON.parse(saved).quadrants : initialQuadrants;
@@ -146,70 +154,91 @@ function App() {
     timestamp: new Date().toISOString(),
   };
 
-  switch (view) {
-    case 'welcome':
-      return (
-        <WelcomeScreen
-          onStart={handleStart}
-          onHistory={handleHistory}
-          hasSavedProgress={hasSavedProgress}
-          onResume={handleResume}
-        />
-      );
+  const renderView = () => {
+    switch (view) {
+      case 'welcome':
+        return (
+          <WelcomeScreen
+            onStart={handleStart}
+            onHistory={handleHistory}
+            hasSavedProgress={hasSavedProgress}
+            onResume={handleResume}
+          />
+        );
 
-    case 'assessment':
-      return (
-        <QuadrantSelector
-          quadrants={quadrants}
-          currentIndex={currentQuadrantIndex}
-          onNext={handleNext}
-          onPrevious={handlePrevious}
-          onExit={() => setView('welcome')}
-          onToggleOption={handleToggleOption}
-          onAddCustom={handleAddCustom}
-          onRemoveCustom={handleRemoveCustom}
-          onComplete={handleReview}
-        />
-      );
+      case 'assessment':
+        return (
+          <QuadrantSelector
+            quadrants={quadrants}
+            currentIndex={currentQuadrantIndex}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+            onExit={() => setView('welcome')}
+            onToggleOption={handleToggleOption}
+            onAddCustom={handleAddCustom}
+            onRemoveCustom={handleRemoveCustom}
+            onComplete={handleReview}
+          />
+        );
 
-    case 'review':
-      return (
-        <ReviewScreen quadrants={quadrants} onEdit={handleEditQuadrant} onAnalyze={handleAnalyze} />
-      );
+      case 'review':
+        return (
+          <ReviewScreen
+            quadrants={quadrants}
+            onEdit={handleEditQuadrant}
+            onAnalyze={handleAnalyze}
+          />
+        );
 
-    case 'analysis':
-      return (
-        <AnalysisScreen
-          data={assessmentData}
-          config={analysisConfig}
-          onComplete={handleAnalysisComplete}
-          onBack={() => setView('review')}
-        />
-      );
+      case 'analysis':
+        return (
+          <AnalysisScreen
+            data={assessmentData}
+            config={analysisConfig}
+            onComplete={handleAnalysisComplete}
+            onBack={() => setView('review')}
+          />
+        );
 
-    case 'report':
-      return (
-        <ReportScreen
-          content={analysisContent}
-          data={assessmentData}
-          onBack={() => setView('welcome')}
-          onHistory={handleHistory}
-        />
-      );
+      case 'report':
+        return (
+          <ReportScreen
+            content={analysisContent}
+            data={assessmentData}
+            onBack={() => setView('welcome')}
+            onHistory={handleHistory}
+          />
+        );
 
-    case 'history':
-      return <HistoryScreen onBack={() => setView('welcome')} onNew={handleNewAssessment} />;
+      case 'history':
+        return <HistoryScreen onBack={() => setView('welcome')} onNew={handleNewAssessment} />;
 
-    default:
-      return (
-        <WelcomeScreen
-          onStart={handleStart}
-          onHistory={handleHistory}
-          hasSavedProgress={hasSavedProgress}
-          onResume={handleResume}
-        />
-      );
-  }
+      default:
+        return (
+          <WelcomeScreen
+            onStart={handleStart}
+            onHistory={handleHistory}
+            hasSavedProgress={hasSavedProgress}
+            onResume={handleResume}
+          />
+        );
+    }
+  };
+
+  return (
+    <>
+      {buildStale && (
+        <div className="border-b border-amber-300 bg-amber-50 px-3 py-2 text-center text-sm text-amber-800">
+          Source files have changed since the last build. Run{' '}
+          <code className="rounded bg-amber-100 px-1.5 py-0.5 font-mono text-xs">
+            npm run restart:pm2
+          </code>{' '}
+          to apply updates.
+        </div>
+      )}
+      {renderView()}
+    </>
+  );
 }
 
 export default App;

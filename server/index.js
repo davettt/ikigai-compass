@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, unlinkSync } from 'fs';
+import { buildStale } from './buildCheck.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -53,6 +54,10 @@ app.use((req, res, next) => {
 // Health check - includes app identifier for auto-discovery
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', app: 'ikigai-compass' });
+});
+
+app.get('/api/build-status', (_req, res) => {
+  res.json({ stale: buildStale });
 });
 
 // ============ Reports API ============
